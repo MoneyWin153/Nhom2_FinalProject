@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Plant vs Zombie</title>
+  <style>
+    canvas {
+      background: #cceecc;
+      display: block;
+      margin: 20px auto;
+      border: 3px solid #333;
+    }
+    body {
+      text-align: center;
+      font-family: Arial;
+    }
+  </style>
+</head>
+<body>
+  <h2>Mini Plant vs Zombie 🌱🧟</h2>
+  <p>Space = Bắn đạn | Zombie sẽ xuất hiện ngẫu nhiên</p>
+  <canvas id="gameCanvas" width="800" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    // Plant (người chơi)
+    const plant = { x: 50, y: 200, size: 40, bullets: [] };
+
+    // Zombie
+    let zombies = [];
+
+    // Vẽ plant
+    function drawPlant() {
+      ctx.fillStyle = "green";
+      ctx.fillRect(plant.x, plant.y, plant.size, plant.size);
+    }
+
+    // Vẽ bullet
+    function drawBullets() {
+      ctx.fillStyle = "yellow";
+      plant.bullets.forEach((b, i) => {
+        ctx.fillRect(b.x, b.y, 10, 5);
+        b.x += 5;
+        if (b.x > canvas.width) plant.bullets.splice(i, 1);
+      });
+    }
+
+    // Vẽ zombie
+    function drawZombies() {
+      ctx.fillStyle = "brown";
+      zombies.forEach((z, zi) => {
+        ctx.fillRect(z.x, z.y, z.size, z.size);
+        z.x -= 1;
+
+        // Check va chạm với plant
+        if (z.x < plant.x + plant.size &&
+            z.x + z.size > plant.x &&
+            z.y < plant.y + plant.size &&
+            z.y + z.size > plant.y) {
+          alert("💀 Bạn thua rồi! Refresh để chơi lại.");
+          document.location.reload();
+        }
+
+        // Check va chạm với bullet
+        plant.bullets.forEach((b, bi) => {
+          if (b.x < z.x + z.size &&
+              b.x + 10 > z.x &&
+              b.y < z.y + z.size &&
+              b.y + 5 > z.y) {
+            zombies.splice(zi, 1);
+            plant.bullets.splice(bi, 1);
+          }
+        });
+      });
+    }
+
+    // Tạo zombie ngẫu nhiên
+    setInterval(() => {
+      const y = Math.random() * (canvas.height - 40);
+      zombies.push({ x: canvas.width - 40, y: y, size: 40 });
+    }, 2000);
+
+    // Loop game
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawPlant();
+      drawBullets();
+      drawZombies();
+      requestAnimationFrame(gameLoop);
+    }
+    gameLoop();
+
+    // Bắn bằng phím Space
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        plant.bullets.push({ x: plant.x + plant.size, y: plant.y + plant.size/2 });
+      }
+    });
+  </script>
+</body>
+</html>
